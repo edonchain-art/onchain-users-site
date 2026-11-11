@@ -561,6 +561,14 @@
   .palette-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(84px, 1fr)); gap:6px; margin:12px 0 8px; }
   .swatch{ aspect-ratio:1; border-radius:6px; border:1px solid rgba(127,127,127,0.25); display:flex; align-items:flex-end; padding:6px; }
   .swatch span{ font-family:var(--font-ui); font-size:10px; letter-spacing:0.5px; }
+  .built-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:14px; margin-top:20px; max-width:860px; }
+  .built-card{ background:var(--panel); border:1px solid var(--border); padding:16px 16px 14px; box-shadow:4px 4px 0 var(--px-shadow, var(--accent-dim)); }
+  .built-card .built-tag{ font-family:var(--font-ui); font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+  .built-card h3{ font-family:var(--font-head); font-size:15px; margin:0 0 8px; color:var(--text); }
+  .built-card p{ font-size:13px; line-height:1.65; color:var(--muted); margin:0; }
+  .built-section > p{ max-width:640px; }
+  .art-updates{ margin:6px 0 16px; padding-left:20px; line-height:1.8; color:var(--muted); }
+  .art-updates b{ color:var(--text); }
   .art-stats{ display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:10px; margin:12px 0 10px; }
   .art-stats div{ background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; }
   .art-stats b{ display:block; font-family:var(--font-ui); font-size:20px; color:var(--text); }
@@ -1417,9 +1425,46 @@
       <p>Onchain Users is released under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener">CC0</a> — full public domain. No copyright, no gatekeeping, no permission needed. Holders and non-holders alike are free to build with the art, forever.</p>
     </div>
 
+    <div class="about-section built-section">
+      <h2 class="pixel">What We've Built</h2>
+      <p>Everything below is already built and tested end to end, on the Sepolia testnet and in a test collection on Ethereum mainnet.</p>
+      <div class="built-grid">
+        <div class="built-card">
+          <div class="built-tag">Fair reveal</div>
+          <h3>Chainlink VRF</h3>
+          <p>Every mint starts as the same animated countdown. When the mint ends, one random number from Chainlink VRF shuffles all the Users at once. Nobody can predict it or pick it, not even the artist.</p>
+        </div>
+        <div class="built-card">
+          <div class="built-tag">Fully onchain</div>
+          <h3>Art &amp; metadata</h3>
+          <p>Every pixel, trait and name is stored in the contract, and every image is drawn as an SVG on request. No IPFS, no server.</p>
+        </div>
+        <div class="built-card">
+          <div class="built-tag">Alive</div>
+          <h3>758 animated Users</h3>
+          <p>Eight animated Types and five moving backgrounds, all pure CSS inside the onchain image.</p>
+        </div>
+        <div class="built-card">
+          <div class="built-tag">Evolving art</div>
+          <h3>Upgrades, then frozen</h3>
+          <p>The art can still be improved and every token updates in place, until <a href="https://x.com/EdOnChain" target="_blank" rel="noopener">@EdOnChain</a> freezes it onchain for good.</p>
+        </div>
+        <div class="built-card">
+          <div class="built-tag">Hidden gems</div>
+          <h3>1 of 1s</h3>
+          <p>Hand-made 1 of 1s by @EdOnChain and guest artists, hidden among the 2,369 until the reveal.</p>
+        </div>
+        <div class="built-card">
+          <div class="built-tag">Mint</div>
+          <h3>On OpenSea</h3>
+          <p>Minted through OpenSea's SeaDrop, with marketplaces told to refresh the moment the reveal lands.</p>
+        </div>
+      </div>
+    </div>
+
     <div class="preview-strip">
       <h2 class="pixel">Sneak Peek</h2>
-      <p class="sub" id="previewSub">A hand drawn pixel art collection, each piece crafted on a 33×33 pixel canvas — fully onchain, pixel by pixel. The pieces below are live from the final contract's test run on Sepolia (50 test mints), some of them move. On mainnet, every mint draws a random User.</p>
+      <p class="sub" id="previewSub">A hand drawn pixel art collection, each piece crafted on a 33×33 pixel canvas — fully onchain, pixel by pixel. The pieces below are live from the final contract's test run on Sepolia (50 test mints), some of them move. On mainnet, every User is revealed at once after the mint, shuffled by Chainlink VRF.</p>
       <div class="preview-grid" id="previewGrid"></div>
     </div>
 
@@ -1449,7 +1494,7 @@
         <div class="eyebrow">02 · Gallery</div>
         <h1 class="pixel">Gallery opens<br>at mint.</h1>
         <p>The full gallery of all 2,369 Onchain Users will be available here once the collection is minted on Ethereum, read straight from the final contract.</p>
-        <p>Until then, every character stays a surprise: each mint draws a random User.</p>
+        <p>Until then, every character stays a surprise: all Users are revealed together after the mint, shuffled by Chainlink VRF.</p>
         <button class="btn-secondary" type="button" onclick="switchView('whitelist')">Join the Whitelist</button>
       </div>
       <!-- The pre-mint preview gallery (old Sepolia test contract) is disabled
@@ -1603,14 +1648,14 @@
       <p>The collection is a portrait of the users of the world computer: builders, traders, degens, collectors, researchers and believers. Each of the 2,369 Users is hand-drawn pixel art on a 33×33 canvas, and every one of them lives entirely on Ethereum.</p>
 
       <h2 class="pixel">Faces &amp; Emotions</h2>
-      <p>At its heart, Onchain Users is a collection of expressions. There are <b>50 faces</b>, and each is a mood every crypto user has worn at some point: the Big Smile of a good mint, Heart Eyes for a new drop, Sweating through a volatile night, Coping after the dump, Drained and Dazed when it all goes sideways, and Laser Eyes when the conviction never left.</p>
+      <p>At its heart, Onchain Users is a collection of expressions. There are <b>51 faces</b>, and each is a mood every crypto user has worn at some point: the Big Smile of a good mint, Heart Eyes for a new drop, Sweating through a volatile night, Coping after the dump, Drained and Dazed when it all goes sideways, and Laser Eyes when the conviction never left.</p>
       <div class="chips">
-        <span>Big Smile</span><span>Heart Eyes</span><span>LOL</span><span>Frens</span><span>Vibing</span><span>Excited</span><span>Sweating</span><span>Coping</span><span>Drained</span><span>Dazed</span><span>Yikes</span><span>Furious</span><span>Lost Keys</span><span>Wen Airdrop</span><span>Whitelisted</span><span>Laser Eyes</span><span>Rugger</span><span>Exploiter</span><span>Asleep</span><span>Recording</span>
+        <span>Big Smile</span><span>Heart Eyes</span><span>LOL</span><span>Frens</span><span>Vibing</span><span>Excited</span><span>Sweating</span><span>Coping</span><span>Drained</span><span>Dazed</span><span>Yikes</span><span>Furious</span><span>Lost Keys</span><span>Wen Airdrop</span><span>Whitelisted</span><span>Laser Eyes</span><span>Rugger</span><span>Exploiter</span><span>Asleep</span><span>Recording</span><span>Undead</span>
       </div>
       <p>A face says more than a trait list ever could. Put the same User in a different mood and it becomes a different person, which is why no two of the 2,369 Users feel the same.</p>
 
       <h2 class="pixel">The Types</h2>
-      <p>Underneath the expressions, every User is one of ten Types. Most are Human, and the rest get rarer from there. Seven Types are animated by their own nature: a Glitch glitches, a Bot scans, a Zombie shambles, a Skull rattles, a Glitch Ghost flickers, an Android pulses and an Alien glows.</p>
+      <p>Underneath the expressions, every User is one of ten Types. Most are Human, and the rest get rarer from there. Eight Types are animated by their own nature: a Glitch glitches, a Bot scans, a Zombie shambles, a Skull rattles, a Glitch Ghost flickers, an Android pulses, an Ape bobs its head and an Alien glows.</p>
       <div class="type-list">
           <div class="type-row">
             <img data-token="5" alt="Human example (Sepolia test token #5)">
@@ -1618,7 +1663,7 @@
               <div class="type-name">Human</div>
               <div class="type-note">Four skin tones: Mocha, Vanilla, Caramel and Cinnamon.</div>
             </div>
-            <div class="type-count"><b>1,605</b><span>67.8%</span><em>Still</em></div>
+            <div class="type-count"><b>1,596</b><span>67.4%</span><em>Still</em></div>
           </div>
           <div class="type-row">
             <img data-token="2" alt="Glitch example (Sepolia test token #2)">
@@ -1680,9 +1725,9 @@
             <img data-token="7" alt="Ape example (Sepolia test token #7)">
             <div class="type-info">
               <div class="type-name">Ape</div>
-              <div class="type-note">A nod to where a lot of us started.</div>
+              <div class="type-note">A nod to where a lot of us started, nodding along to the beat.</div>
             </div>
-            <div class="type-count"><b>24</b><span>1.0%</span><em>Still</em></div>
+            <div class="type-count"><b>24</b><span>1.0%</span><em>Bobs</em></div>
           </div>
           <div class="type-row">
             <img data-token="10" alt="Alien example (Sepolia test token #10)">
@@ -1693,10 +1738,10 @@
             <div class="type-count"><b>9</b><span>0.4%</span><em>Glows</em></div>
           </div>
       </div>
-      <p class="art-caption">Examples are live test tokens from the final contract on Sepolia; the Android and Glitch Ghost examples are rendered from the final art, exactly as the contract will return them. On mainnet, every mint draws a random User.</p>
+      <p class="art-caption">Examples are live test tokens from the final contract on Sepolia; the Android and Glitch Ghost examples are rendered from the final art, exactly as the contract will return them. On mainnet, every User is revealed at once after the mint, shuffled by Chainlink VRF.</p>
 
       <h2 class="pixel">The Traits</h2>
-      <p>Every User is built from layers stacked on top of each other, from the background up to the accessory in their hand. Across the collection there are <b>230 drawn traits</b>, plus a Gender trait and an Attribute Count in the metadata.</p>
+      <p>Every User is built from layers stacked on top of each other, from the background up to the accessory in their hand. Across the collection there are <b>231 drawn traits</b>, plus a Gender trait and an Attribute Count in the metadata.</p>
       <table class="layer-table">
         <thead><tr><th>Layer</th><th>Traits</th><th>Notes</th></tr></thead>
         <tbody>
@@ -1704,7 +1749,7 @@
           <tr><td>Type</td><td>13</td><td>10 kinds of User, Humans in 4 skin tones</td></tr>
           <tr><td>Head</td><td>63</td><td>Hair, hats, hoods and helmets</td></tr>
           <tr><td>Body</td><td>61</td><td>From hoodies to tuxedos</td></tr>
-          <tr><td>Face</td><td>50</td><td>The expressions: the heart of the collection</td></tr>
+          <tr><td>Face</td><td>51</td><td>The expressions: the heart of the collection</td></tr>
           <tr><td>Accessory</td><td>12</td><td>What a User carries</td></tr>
           <tr><td>Beard</td><td>7</td><td></td></tr>
           <tr><td>Nose</td><td>3</td><td></td></tr>
@@ -1723,7 +1768,7 @@
       <div class="chips"><span>Diamond Hands</span><span>Seed Phrase Note</span><span>Hardware Wallet</span><span>Dropping Alpha</span><span>Phone - Green Candle</span><span>Miner Tool</span><span>Snapshot Tool</span><span>Popcorn</span></div>
 
       <h2 class="pixel">The Palette</h2>
-      <p>The entire collection is painted with just <b>75 colors</b>. Every skin tone, every hoodie, every laser and every sunset comes from this one palette, the same bytes the contract uses to draw each User.</p>
+      <p>The entire collection is painted with just <b>87 colors</b>. Every skin tone, every hoodie, every laser and every sunset comes from this one palette, the same bytes the contract uses to draw each User.</p>
       <div class="palette-grid">
           <div class="swatch" style="background:#000000;color:#f4f4f6"><span>#000000</span></div>
           <div class="swatch" style="background:#202020;color:#f4f4f6"><span>#202020</span></div>
@@ -1800,28 +1845,57 @@
           <div class="swatch" style="background:#99e65f;color:#0b0b10"><span>#99E65F</span></div>
           <div class="swatch" style="background:#d3fc7e;color:#0b0b10"><span>#D3FC7E</span></div>
           <div class="swatch" style="background:#0cf1ff;color:#0b0b10"><span>#0CF1FF</span></div>
+          <div class="swatch" style="background:#33984b;color:#f4f4f6"><span>#33984B</span></div>
+          <div class="swatch" style="background:#5ac54f;color:#0b0b10"><span>#5AC54F</span></div>
+          <div class="swatch" style="background:#3b1443;color:#f4f4f6"><span>#3B1443</span></div>
+          <div class="swatch" style="background:#c42430;color:#f4f4f6"><span>#C42430</span></div>
+          <div class="swatch" style="background:#ea323c;color:#f4f4f6"><span>#EA323C</span></div>
+          <div class="swatch" style="background:#f5555d;color:#f4f4f6"><span>#F5555D</span></div>
+          <div class="swatch" style="background:#edab50;color:#0b0b10"><span>#EDAB50</span></div>
+          <div class="swatch" style="background:#ffc825;color:#0b0b10"><span>#FFC825</span></div>
+          <div class="swatch" style="background:#ffeb57;color:#0b0b10"><span>#FFEB57</span></div>
+          <div class="swatch" style="background:#e1e1e1;color:#0b0b10"><span>#E1E1E1</span></div>
+          <div class="swatch" style="background:#eeeeee;color:#0b0b10"><span>#EEEEEE</span></div>
+          <div class="swatch" style="background:#f389f5;color:#0b0b10"><span>#F389F5</span></div>
       </div>
-      <p class="art-caption">All 75 colors in the collection, with their hex codes.</p>
+      <p class="art-caption">All 87 colors in the collection, with their hex codes. The last twelve arrived with the redrawn Faces, the new Clown head and the Undead Face.</p>
 
       <h2 class="pixel">Some of Them Move</h2>
-      <p><b>735 of the 2,369 Users are animated</b>, and every animation is pure CSS stored inside the SVG the contract returns. No video, no GIF, no server. Glitches tear and recover while their background holds still, Bots run a scan over their metal, Zombies shamble, Skulls rattle, Glitch Ghosts fade and tear sideways, Androids pulse their circuits and Aliens glow. Five of the backgrounds move too: Digital Code rains, Mist drifts, Clouds pass, No Signal Screen flickers and Blue Screen blinks its cursor.</p>
+      <p><b>758 of the 2,369 Users are animated</b>, and every animation is pure CSS stored inside the SVG the contract returns. No video, no GIF, no server. Glitches tear and recover while their background holds still, Bots run a scan over their metal, Zombies shamble, Skulls rattle, Glitch Ghosts fade and tear sideways, Androids pulse their circuits, Apes bob their heads and Aliens glow. Five of the backgrounds move too: Digital Code rains, Mist drifts, Clouds pass, No Signal Screen flickers and Blue Screen blinks its cursor.</p>
+
+      <h2 class="pixel">One of Ones</h2>
+      <p>Hidden among the 2,369 are a handful of <b>hand-made 1 of 1s</b>: characters that exist only once, drawn by <a href="https://x.com/EdOnChain" target="_blank" rel="noopener">@EdOnChain</a> and by guest artists who are creating pieces for the collection right now. Each one takes the place of a regular User, so the supply stays at 2,369, and each is stored onchain exactly like every other User.</p>
+      <p>A 1 of 1 has only two traits: its Type, <b>1 of 1</b>, and its own <b>Name</b>. Which ones there are, and who they are, stays a surprise until the reveal.</p>
+
+      <h2 class="pixel">The Art Keeps Getting Better</h2>
+      <p>The collection isn't finished the moment it's deployed. The art lives in its own renderer contract, separate from the tokens, and until the artist freezes it, an improved renderer can take its place. Since the first test run, the art has already grown:</p>
+      <ul class="art-updates">
+        <li><b>Redrawn Faces:</b> Excited, Silly, Winking, Frens, Smoking, Nerd and Heart Eyes, all drawn again by hand.</li>
+        <li><b>A new Clown head</b>, redrawn from scratch.</li>
+        <li><b>A new Face, Undead</b>, worn by 30 Zombies and Skinless.</li>
+        <li><b>Two new Types:</b> Android and Glitch Ghost, each with its own animation.</li>
+        <li><b>Apes started moving:</b> every Ape now bobs its head.</li>
+        <li><b>Pixel-perfect fixes</b> on Faces and hats, down to single stray pixels.</li>
+      </ul>
+      <p>When an upgrade ships, every token updates in place: the contract tells marketplaces to refresh, and your User simply looks better. Nothing to claim, nothing to migrate.</p>
+      <p class="emphasis">Then it's frozen for good. When the art is final, <a href="https://x.com/EdOnChain" target="_blank" rel="noopener">@EdOnChain</a> freezes the renderer onchain. That switch only goes one way: after it, nobody, not even the artist, can ever change a pixel again.</p>
 
       <h2 class="pixel">By the Numbers</h2>
       <div class="art-stats">
         <div><b>2,369</b><span>Users</span></div>
         <div><b>33×33</b><span>Pixel canvas</span></div>
-        <div><b>75</b><span>Colors</span></div>
-        <div><b>230</b><span>Drawn traits</span></div>
-        <div><b>50</b><span>Faces</span></div>
+        <div><b>87</b><span>Colors</span></div>
+        <div><b>231</b><span>Drawn traits</span></div>
+        <div><b>51</b><span>Faces</span></div>
         <div><b>10</b><span>Types</span></div>
-        <div><b>735</b><span>Animated</span></div>
+        <div><b>758</b><span>Animated</span></div>
         <div><b>100%</b><span>Onchain</span></div>
         <div><b>CC0</b><span>License</span></div>
       </div>
 
       <h2 class="pixel">Built to Last</h2>
       <p>There are no image files behind Onchain Users. The pixels, the traits and the animations are stored as bytes inside the smart contract, and every image is drawn from those bytes as an SVG whenever someone asks for it. No IPFS, no server, no company that has to stay in business.</p>
-      <p>Every mint draws a random User that hasn't been taken yet, so nobody knows in advance which face they'll get. And the whole collection is released under CC0: holders and non-holders alike are free to build with it, forever.</p>
+      <p>Nobody knows in advance which face they'll get. Every mint starts as the same animated countdown, and when the mint ends, all Users are revealed at once, shuffled by a random number from <b>Chainlink VRF</b> that nobody can predict or choose, not even the artist. And the whole collection is released under CC0: holders and non-holders alike are free to build with it, forever.</p>
       <p class="emphasis">2,369 Users. Every one of them is someone you've met onchain. Maybe one of them is you.</p>
     </article>
   </section>
@@ -1860,7 +1934,7 @@
       </details>
       <details class="faq-item">
         <summary>Which User will I get?</summary>
-        <div class="faq-a"><p>Every mint draws a random User that hasn't been minted yet, so nobody, not even the artist, knows in advance which face you'll get. Each User exists exactly once.</p></div>
+        <div class="faq-a"><p>Nobody knows, not even the artist. Every mint starts as the same animated countdown. When the mint ends, all the Users are revealed at once, shuffled by a random number from Chainlink VRF that can't be predicted or chosen by anyone. Each User exists exactly once.</p></div>
       </details>
       <details class="faq-item">
         <summary>When is the mint?</summary>
@@ -1872,7 +1946,15 @@
       </details>
       <details class="faq-item">
         <summary>Why do some Users move?</summary>
-        <div class="faq-a"><p>735 of the 2,369 Users are animated, and the animation is part of the onchain image itself. Glitches tear and recover, Bots run a scan, Zombies shamble, Skulls rattle, Glitch Ghosts flicker, Androids pulse, Aliens glow, and five of the backgrounds move.</p></div>
+        <div class="faq-a"><p>758 of the 2,369 Users are animated, and the animation is part of the onchain image itself. Glitches tear and recover, Bots run a scan, Zombies shamble, Skulls rattle, Glitch Ghosts flicker, Androids pulse, Apes bob their heads, Aliens glow, and five of the backgrounds move.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Are there 1 of 1s?</summary>
+        <div class="faq-a"><p>Yes. A handful of hand-made 1 of 1s by @EdOnChain and guest artists are hidden among the 2,369 Users, and more artists are creating pieces right now. Each 1 of 1 shows just two traits, its Type (1 of 1) and its Name. Which ones exist stays a surprise until the reveal.</p></div>
+      </details>
+      <details class="faq-item">
+        <summary>Can the art change after the mint?</summary>
+        <div class="faq-a"><p>It can get better, and then it gets locked. The art lives in a separate renderer contract, so the artist can still ship improvements, like redrawn Faces or new animations, and every token updates in place. Once the art is final, @EdOnChain freezes the renderer onchain. That can't be undone: from then on, nobody can change a single pixel.</p></div>
       </details>
     </div>
   </section>
