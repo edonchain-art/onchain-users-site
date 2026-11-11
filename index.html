@@ -60,6 +60,7 @@
     --muted:#8C8C8C;
     --good:#7CFFC4;
     --bad:#FF5C5C;
+    --grid:rgba(138,127,163,0.075);
   }
   html[data-theme="light"]{
     --void:#FFFFFF;
@@ -74,11 +75,18 @@
     --muted:#6B6B6C;
     --good:#1F9D64;
     --bad:#D6362B;
+    --grid:rgba(98,126,234,0.08);
   }
   *{box-sizing:border-box;}
   html, body{ margin:0; height:100%; }
   body{
-    background:var(--void);
+    background-color:var(--void);
+    /* Retro pixel grid: 1px lines every 16px, very faint */
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:16px 16px;
+    background-attachment:fixed;
     color:var(--text);
     font-family:var(--font-body);
   }
@@ -630,6 +638,33 @@
     padding:90px 48px 100px;
     max-width:640px;
   }
+  /* Live chain ticker: ETH price (Chainlink feed) + gas + block, read from mainnet */
+  .chain-ticker{
+    font-family:var(--font-ui);
+    font-size:11px;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    padding:10px 12px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    box-shadow:3px 3px 0 var(--px-shadow, var(--accent-dim));
+  }
+  .chain-ticker .tk-row{ display:flex; align-items:center; gap:8px; }
+  .chain-ticker .tk-label{ color:var(--accent); letter-spacing:1px; min-width:42px; }
+  .chain-ticker .tk-val{ color:var(--text); font-weight:600; margin-left:auto; font-variant-numeric:tabular-nums; }
+  .chain-ticker .tk-dot{ width:6px; height:6px; background:var(--good); flex:none; animation:tkblink 1.6s steps(1) infinite; }
+  .chain-ticker.offline .tk-dot{ background:var(--bad); animation:none; }
+  .chain-ticker .tk-live{ color:var(--muted); font-size:9.5px; letter-spacing:1.5px; }
+  @keyframes tkblink{ 0%{ opacity:1; } 50%{ opacity:.25; } }
+  .chain-ticker-mobile{ display:none; }
+  @media (max-width:900px){
+    .chain-ticker-mobile{ display:flex; flex-direction:row; flex-wrap:wrap; justify-content:center; gap:6px 18px; margin:12px 20px 0; padding:8px 12px; }
+    .chain-ticker-mobile .tk-row{ gap:6px; }
+    .chain-ticker-mobile .tk-label{ min-width:0; }
+    .chain-ticker-mobile .tk-val{ margin-left:0; }
+  }
+
   @media (prefers-reduced-motion: reduce){
     *, *::before, *::after{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important; }
   }
@@ -1212,11 +1247,73 @@
   }
   .btn-primary:disabled{ box-shadow:none; }
 
+  /* ============================================================
+     MENU RAIL, GAS WEATHER, WANDERING USERS
+     ============================================================ */
+  /* Desktop menu: a thin rail that slides open on hover, or while the keyboard (Tab) is in it.
+     A mouse click does not keep it open (:focus-visible, not :focus-within).
+     It opens over the page, so nothing underneath moves. */
+  .logo-mark{ display:none; }
+  @media (min-width:901px){
+    .sitenav{
+      width:64px; padding:20px 10px; overflow-x:hidden;
+      transition:width .16s steps(5), box-shadow .16s steps(5);
+    }
+    .sitenav:hover, .sitenav:has(:focus-visible){ width:240px; box-shadow:6px 0 0 rgba(0,0,0,.35); }
+    .content{ margin-left:64px; }
+    .logo-mark{ display:block; width:40px; height:40px; margin:0 2px 30px; image-rendering:pixelated; border:1px solid var(--border); }
+    .sitenav .logo{ display:none; }
+    .sitenav:hover .logo-mark, .sitenav:has(:focus-visible) .logo-mark{ display:none; }
+    .sitenav:hover .logo, .sitenav:has(:focus-visible) .logo{ display:block; margin-bottom:40px; }
+    .navlist button{ white-space:nowrap; overflow:hidden; padding:11px 10px; }
+    .navlist .navnum{ display:inline-block; width:20px; }
+    .sitenav:not(:hover):not(:has(:focus-visible)) .navlist button{ color:transparent; }
+    .sitenav-footer{ visibility:hidden; opacity:0; transition:opacity .1s steps(2); min-width:206px; }
+    .sitenav:hover .sitenav-footer, .sitenav:has(:focus-visible) .sitenav-footer{ visibility:visible; opacity:1; }
+    /* a small arrow tells people the rail opens */
+    .sitenav::after{
+      content:"›"; position:absolute; left:0; right:0; bottom:18px; text-align:center;
+      font-family:var(--font-ui); font-size:18px; color:var(--accent);
+    }
+    .sitenav:hover::after, .sitenav:has(:focus-visible)::after{ content:none; }
+  }
+  /* Gas weather: a canvas behind the page that paints into the grid squares */
+  #gasWeather{ position:fixed; inset:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; }
+  /* Wandering Users: real Users from the test collection walking along the bottom */
+  #walkers{ position:fixed; left:0; right:0; bottom:0; height:0; z-index:30; pointer-events:none; }
+  .walker{
+    position:absolute; bottom:0; left:0; width:66px; height:66px; pointer-events:auto; cursor:pointer;
+    will-change:transform;
+  }
+  .walker img{ width:100%; height:100%; display:block; image-rendering:pixelated; animation:walkbob .5s steps(1) infinite; }
+  .walker.flip img{ transform:scaleX(-1); }
+  .walker.paused img{ animation:none; }
+  @keyframes walkbob{ 0%{ translate:0 0; } 50%{ translate:0 -3px; } }
+  .walker-tip{
+    position:absolute; bottom:72px; left:50%; translate:-50% 0; white-space:nowrap;
+    font-family:var(--font-ui); font-size:11px; color:var(--text); background:var(--panel2);
+    border:1px solid var(--border); padding:6px 9px; box-shadow:3px 3px 0 var(--px-shadow, var(--accent-dim));
+    display:none;
+  }
+  .walker.hover .walker-tip{ display:block; }
+  @media (max-width:900px){ .walker{ width:48px; height:48px; } .walker-tip{ bottom:54px; } }
+  @media (max-width:699px){ #walkers{ display:none; } }
+  /* Phones and tablets: a thin top menu. Labels stay on one line ("05 The Art"),
+     tighter padding, and the sideways scrollbar is hidden (it still swipes). */
+  @media (max-width:900px){
+    .sitenav{ padding:8px 14px; }
+    .sitenav .logo{ line-height:1.35; font-size:12px; margin-right:14px; flex:none; }
+    .navlist{ overflow-x:auto; flex:1; min-width:0; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .navlist::-webkit-scrollbar{ display:none; }
+    .navlist button{ white-space:nowrap; padding:8px 10px; flex:none; }
+    .sitenav{ overflow-x:hidden; }
+  }
 </style>
 </head>
 <body>
 
 <nav class="sitenav">
+  <img class="logo-mark" src="onchainusers-avatar.gif" alt="" width="40" height="40">
   <div class="logo pixel">ONCHAIN<br><span>USERS</span></div>
   <div class="navlist">
     <button data-view="profile"><span class="navnum">00</span>Profile</button>
@@ -1228,6 +1325,14 @@
     <button data-view="faq"><span class="navnum">06</span>FAQ</button>
   </div>
   <div class="sitenav-footer">
+    <div class="chain-ticker" title="Live from Ethereum mainnet: ETH/USD from the Chainlink price feed, gas from the network">
+      <div class="tk-row"><span class="tk-dot"></span><span class="tk-live">LIVE · MAINNET</span></div>
+      <div class="tk-row"><span class="tk-label">ETH</span><span class="tk-val" data-ticker="eth">…</span></div>
+      <div class="tk-row"><span class="tk-label">GAS</span><span class="tk-val" data-ticker="gas">…</span></div>
+      <div class="tk-row"><span class="tk-label">BLOCK</span><span class="tk-val" data-ticker="block">…</span></div>
+
+      <div class="tk-row"><span class="tk-label">SKY</span><span class="tk-val" data-ticker="sky">…</span></div>
+    </div>
     <div class="social-row">
       <a href="https://x.com/onchainUsers" target="_blank" rel="noopener" aria-label="X">
         <svg viewBox="0 0 24 24"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7.1l-5.5-7.2L4.4 22H1.3l8.1-9.3L1 2h7.3l5 6.6L18.9 2zm-1.2 18h1.9L7.4 3.9H5.4L17.7 20z"/></svg>
@@ -1248,7 +1353,17 @@
   </div>
 </nav>
 
+<canvas id="gasWeather" aria-hidden="true"></canvas>
+<div id="walkers" aria-hidden="true"></div>
 <div class="content">
+  <div class="chain-ticker chain-ticker-mobile" title="Live from Ethereum mainnet: ETH/USD from the Chainlink price feed, gas from the network">
+    <div class="tk-row"><span class="tk-dot"></span><span class="tk-live">LIVE · MAINNET</span></div>
+    <div class="tk-row"><span class="tk-label">ETH</span><span class="tk-val" data-ticker="eth">…</span></div>
+    <div class="tk-row"><span class="tk-label">GAS</span><span class="tk-val" data-ticker="gas">…</span></div>
+    <div class="tk-row"><span class="tk-label">BLOCK</span><span class="tk-val" data-ticker="block">…</span></div>
+
+    <div class="tk-row"><span class="tk-label">SKY</span><span class="tk-val" data-ticker="sky">…</span></div>
+  </div>
 
   <section class="view" id="view-profile">
     <div class="profile-page">
@@ -1994,6 +2109,192 @@
     }
     throw new Error("Could not reach any public Ethereum Mainnet RPC.");
   }
+
+  // Live chain ticker. ETH/USD comes from Chainlink's onchain price feed and
+  // gas from the network itself, through the same mainnet RPCs as above: no
+  // price API, nothing new to allow in the CSP. Plain one-shot JSON-RPC
+  // requests (no ethers provider, so nothing keeps polling in the background);
+  // on failure it moves to the next RPC. Refreshes every 15 s while visible.
+  (function chainTicker() {
+    const FEED = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"; // Chainlink ETH / USD, Ethereum mainnet
+    const LATEST_ROUND_DATA = "0xfeaf968c";                  // latestRoundData()
+    let rpc = 0, busy = false, failures = 0;
+    const set = (key, text) => document.querySelectorAll('[data-ticker="' + key + '"]').forEach((el) => { el.textContent = text; });
+    const status = (ok) => document.querySelectorAll(".chain-ticker").forEach((el) => el.classList.toggle("offline", !ok));
+    const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+    async function call(url, method, params) {
+      const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 8000);
+      try {
+        const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, signal: ctl.signal,
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
+        const json = await res.json();
+        if (!res.ok || json.error || typeof json.result !== "string") throw new Error("rpc");
+        return json.result;
+      } finally { clearTimeout(timer); }
+    }
+    async function tick() {
+      if (busy || document.hidden) return;
+      busy = true;
+      try {
+        for (let tries = 0; tries < MAINNET_PUBLIC_RPCS.length; tries++) {
+          const url = MAINNET_PUBLIC_RPCS[rpc];
+          try {
+            const [round, gas, block] = await Promise.all([
+              call(url, "eth_call", [{ to: FEED, data: LATEST_ROUND_DATA }, "latest"]),
+              call(url, "eth_gasPrice", []),
+              call(url, "eth_blockNumber", [])
+            ]);
+            const price = Number(BigInt("0x" + round.slice(2 + 64, 2 + 128))) / 1e8; // 2nd word: answer, 8 decimals
+            const gwei = Number(BigInt(gas)) / 1e9;
+            if (!(price > 0)) throw new Error("price");
+            set("eth", usd.format(price));
+            set("gas", (gwei < 10 ? gwei.toFixed(2) : Math.round(gwei).toString()) + " gwei");
+            set("block", "#" + Number(BigInt(block)).toLocaleString("en-US"));
+            window.dispatchEvent(new CustomEvent("chain:gas", { detail: gwei }));
+            failures = 0;
+            status(true);
+            return;
+          } catch (e) {
+            rpc = (rpc + 1) % MAINNET_PUBLIC_RPCS.length;
+          }
+        }
+        if (++failures >= 2) status(false); // every RPC failed twice in a row
+      } finally {
+        busy = false;
+      }
+    }
+    tick();
+    setInterval(tick, 15000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+  })();
+
+  // ---------- Gas weather ----------
+  // The background reacts to the live gas price: calm network, calm sky;
+  // busy network, pixel rain; a gas spike, a storm with lightning. Everything
+  // is drawn into the 16px grid squares. Preview any weather with ?gas=25.
+  (function gasWeather() {
+    const cv = document.getElementById("gasWeather");
+    if (!cv || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ctx = cv.getContext("2d");
+    const CELL = 16;
+    // The theme's own colours, read live so light/dark mode both match.
+    const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    const PAL = () => [css("--accent"), css("--accent-hover"), css("--muted")];
+    const RAIN = () => [css("--accent"), css("--accent-hover")];
+    const forced = Number(new URLSearchParams(location.search).get("gas"));
+    let gwei = forced > 0 ? forced : null;
+    let W = 0, H = 0, cols = 0, rows = 0;
+    const parts = [];
+    let flash = 0, bolt = null, last = performance.now(), acc = 0, boltTimer = 3;
+    function size() {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = innerWidth; H = innerHeight;
+      cv.width = W * dpr; cv.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(W / CELL); rows = Math.ceil(H / CELL);
+    }
+    size(); addEventListener("resize", size);
+    const sky = (g) => g == null ? null : g < 1 ? ["CALM", 0] : g < 5 ? ["BREEZY", 1] : g < 20 ? ["BUSY", 2] : ["STORMY", 3];
+    function label() {
+      const s = sky(gwei);
+      if (s) document.querySelectorAll('[data-ticker="sky"]').forEach((el) => { el.textContent = s[0]; });
+    }
+    addEventListener("chain:gas", (e) => { if (!(forced > 0)) { gwei = e.detail; label(); } });
+    label();
+    const light = () => document.documentElement.dataset.theme === "light";
+    const rnd = (a) => a[Math.floor(Math.random() * a.length)];
+    function spawn(level) {
+      if (level >= 2 && Math.random() < 0.75) {
+        parts.push({ kind: "drop", x: Math.floor(Math.random() * cols), y: -1, speed: level === 3 ? 22 : 12, c: rnd(RAIN()), t: 0 });
+      } else {
+        parts.push({ kind: "spark", x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows), c: rnd(PAL()), t: 0, life: 1.6 + Math.random() * 1.4 });
+      }
+    }
+    function cell(x, y, color, a) {
+      if (a <= 0) return;
+      ctx.globalAlpha = Math.min(1, a); ctx.fillStyle = color;
+      ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 1, CELL - 1);
+    }
+    function frame(now) {
+      requestAnimationFrame(frame);
+      const dt = Math.min(0.1, (now - last) / 1000);
+      if (dt < 1 / 30) return; // ~30 fps is plenty
+      last = now;
+      ctx.clearRect(0, 0, W, H);
+      const s = sky(gwei);
+      const level = s ? s[1] : 0;
+      const peak = light() ? 0.16 : 0.22;
+      if (s) {
+        const rate = [0.7, 3, 14, 34][level]; // new pixels per second
+        acc += rate * dt;
+        while (acc >= 1) { spawn(level); acc--; }
+      }
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        p.t += dt;
+        if (p.kind === "paint") {
+          const k = p.t / p.life;
+          if (k >= 1) { parts.splice(i, 1); continue; }
+          cell(p.x, p.y, p.c, p.a * (light() ? 0.7 : 1) * (1 - k) * (1 - k));
+          continue;
+        }
+        if (p.kind === "spark") {
+          const k = p.t / p.life;
+          if (k >= 1) { parts.splice(i, 1); continue; }
+          cell(p.x, p.y, p.c, peak * Math.sin(Math.PI * k));
+        } else {
+          p.y += p.speed * dt;
+          const y = Math.floor(p.y);
+          if (y - 3 > rows) { parts.splice(i, 1); continue; }
+          for (let k = 0; k < 4; k++) cell(p.x, y - k, p.c, peak * 1.2 * (1 - k / 4));
+        }
+      }
+      if (level === 3) { // storm: a lightning bolt every few seconds
+        boltTimer -= dt;
+        if (boltTimer <= 0) {
+          boltTimer = 3 + Math.random() * 5; flash = 0.25;
+          let x = Math.floor(Math.random() * cols);
+          bolt = [];
+          for (let y = 0; y < rows * 0.6; y++) { bolt.push([x, y]); if (Math.random() < 0.35) x += Math.random() < 0.5 ? -1 : 1; }
+        }
+      }
+      if (flash > 0) {
+        const glow = css("--accent-hover");
+        ctx.globalAlpha = flash * 0.2; ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+        if (bolt) for (const [x, y] of bolt) cell(x, y, glow, flash * 2.4);
+        flash -= dt;
+        if (flash <= 0) bolt = null;
+      }
+      ctx.globalAlpha = 1;
+    }
+    // Mouse paint (like drawing on a pixel canvas). Squares under the pointer
+    // light up in the theme's accent and fade; each square is painted once per
+    // pass so a resting mouse doesn't pile up.
+    // Fast moves skip squares, so the line between the last square and this
+    // one is filled in too (a pixel-art line, square by square).
+    let lx = null, ly = null;
+    function paint(x, y, c) {
+      parts.push({ kind: "paint", x, y, c, a: 0.14, t: 0, life: 0.7 });
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        if (Math.random() < 0.35) parts.push({ kind: "paint", x: x + dx, y: y + dy, c, a: 0.04, t: 0, life: 0.5 });
+      }
+    }
+    addEventListener("pointermove", (e) => {
+      const x = Math.floor(e.clientX / CELL), y = Math.floor(e.clientY / CELL);
+      if (x === lx && y === ly) return;
+      const c = css("--accent-hover");
+      if (lx === null || Math.abs(x - lx) + Math.abs(y - ly) > 40) { paint(x, y, c); }
+      else {
+        const n = Math.max(Math.abs(x - lx), Math.abs(y - ly));
+        for (let i = 1; i <= n; i++) paint(Math.round(lx + (x - lx) * i / n), Math.round(ly + (y - ly) * i / n), c);
+      }
+      lx = x; ly = y;
+      if (parts.length > 900) parts.splice(0, parts.length - 900); // safety cap
+    }, { passive: true });
+    addEventListener("pointerleave", () => { lx = ly = null; });
+
+    requestAnimationFrame(frame);
+  })();
 
   function ipfsToHttp(url) {
     if (!url) return url;
@@ -3587,6 +3888,71 @@
   initGameUI();
 
   loadWhitelistStats();
+
+  // ---------- Wandering Users ----------
+  // A few real Users from the test collection (Sepolia, read live with
+  // tokenURI) walk along the bottom of the screen. Hover one to pause it and
+  // see who it is; click to open it on the block explorer.
+  window.addEventListener("load", () => setTimeout(async function wanderingUsers() {
+    const box = document.getElementById("walkers");
+    // Not on phones: the screen is too narrow (they'd walk over the content)
+    // and a tap meant for the page could open a walker's link instead.
+    if (!box || innerWidth < 700 || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    try {
+      await ensureShowcaseContract();
+      const c = new ethers.Contract(SHOWCASE_CONTRACT, ["function tokenURI(uint256) view returns (string)"], showcaseContract.runner);
+      const count = innerWidth < 900 ? 2 : 3;
+      const users = [];
+      // Only Users on a plain one-colour background walk: that background is
+      // one full-canvas square, removed here so just the character walks.
+      const PLAIN_BG = /^(<svg[^>]*>)<path fill="#[0-9a-fA-F]{6}" d="M0 0h33v33H0z"\/>/;
+      for (const id of pickShowcaseIds(Math.min(showcaseTotal, 12))) {
+        if (users.length >= count) break;
+        const uri = await c.tokenURI(id);
+        const meta = JSON.parse(decodeURIComponent(escape(atob(uri.split(",")[1]))));
+        let svg = decodeURIComponent(escape(atob(meta.image.split(",")[1])));
+        if (!PLAIN_BG.test(svg)) continue;
+        svg = svg.replace(PLAIN_BG, "$1");
+        const attr = (k) => (meta.attributes.find((a) => a.trait_type === k) || {}).value;
+        users.push({ id, name: meta.name, type: attr("Type"), face: attr("Face"),
+          src: "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg))) });
+      }
+      const left = () => (innerWidth > 900 ? 64 : 0);
+      const walkers = users.map((u, k) => {
+        const el = document.createElement("a");
+        el.className = "walker";
+        el.href = SHOWCASE_EXPLORER + u.id; el.target = "_blank"; el.rel = "noopener";
+        const img = document.createElement("img"); img.alt = ""; img.src = u.src;
+        const tip = document.createElement("span"); tip.className = "walker-tip";
+        tip.textContent = u.name + " · " + u.type + (u.face ? " · " + u.face : "");
+        el.append(img, tip);
+        box.appendChild(el);
+        const w = { el, x: left() + 60 + k * ((innerWidth - left()) / count), dir: Math.random() < 0.5 ? 1 : -1,
+          speed: 22 + Math.random() * 18, hover: false, rest: 0 };
+        el.addEventListener("mouseenter", () => { w.hover = true; el.classList.add("hover", "paused"); });
+        el.addEventListener("mouseleave", () => { w.hover = false; el.classList.remove("hover"); });
+        return w;
+      });
+      let last = performance.now();
+      (function step(now) {
+        requestAnimationFrame(step);
+        const dt = Math.min(0.1, (now - last) / 1000);
+        last = now;
+        for (const w of walkers) {
+          const size = w.el.offsetWidth;
+          if (w.hover) continue;
+          if (w.rest > 0) { w.rest -= dt; w.el.classList.add("paused"); continue; }
+          w.el.classList.remove("paused");
+          w.x += w.dir * w.speed * dt;
+          const min = left() + 8, max = innerWidth - size - 24;
+          if (w.x < min || w.x > max) { w.x = Math.max(min, Math.min(max, w.x)); w.dir *= -1; }
+          else if (Math.random() < dt * 0.08) w.rest = 1 + Math.random() * 2.5; // stop for a moment now and then
+          w.el.classList.toggle("flip", w.dir < 0);
+          w.el.style.transform = "translateX(" + Math.round(w.x) + "px)";
+        }
+      })(last);
+    } catch (e) { /* no walkers if the test contract can't be read */ }
+  }, 1500));
 
   // ---------- Overview page: live random showcase, flipping in new pieces ----------
   // Pieces come from the FINAL contracts' test deploy on Sepolia (50 public
