@@ -2119,6 +2119,22 @@
     const FEED = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"; // Chainlink ETH / USD, Ethereum mainnet
     const LATEST_ROUND_DATA = "0xfeaf968c";                  // latestRoundData()
     let rpc = 0, busy = false, failures = 0;
+    // What "normal" gas is right now: the median base fee of the last 1,024
+    // blocks (about 3.4 hours), from eth_feeHistory. Refreshed every 5 minutes.
+    let normal = null, normalAt = 0;
+    async function refreshNormal(url) {
+      if (normal !== null && Date.now() - normalAt < 5 * 60 * 1000) return;
+      for (const n of ["0x400", "0x100"]) { // some RPCs cap the range
+        try {
+          const h = await call(url, "eth_feeHistory", [n, "latest", []]);
+          const fees = (h.baseFeePerGas || []).map((x) => Number(BigInt(x)) / 1e9).filter((x) => x > 0).sort((a, b) => a - b);
+          if (fees.length < 32) continue;
+          normal = fees[Math.floor(fees.length / 2)];
+          normalAt = Date.now();
+          return;
+        } catch (e) { /* try a shorter range */ }
+      }
+    }
     const set = (key, text) => document.querySelectorAll('[data-ticker="' + key + '"]').forEach((el) => { el.textContent = text; });
     const status = (ok) => document.querySelectorAll(".chain-ticker").forEach((el) => el.classList.toggle("offline", !ok));
     const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
@@ -2128,7 +2144,7 @@
         const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, signal: ctl.signal,
           body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
         const json = await res.json();
-        if (!res.ok || json.error || typeof json.result !== "string") throw new Error("rpc");
+        if (!res.ok || json.error || json.result == null) throw new Error("rpc");
         return json.result;
       } finally { clearTimeout(timer); }
     }
@@ -2150,7 +2166,8 @@
             set("eth", usd.format(price));
             set("gas", (gwei < 10 ? gwei.toFixed(2) : Math.round(gwei).toString()) + " gwei");
             set("block", "#" + Number(BigInt(block)).toLocaleString("en-US"));
-            window.dispatchEvent(new CustomEvent("chain:gas", { detail: gwei }));
+            await refreshNormal(url).catch(() => {});
+            window.dispatchEvent(new CustomEvent("chain:gas", { detail: { gwei, normal } }));
             failures = 0;
             status(true);
             return;
@@ -2194,12 +2211,33 @@
       cols = Math.ceil(W / CELL); rows = Math.ceil(H / CELL);
     }
     size(); addEventListener("resize", size);
-    const sky = (g) => g == null ? null : g < 1 ? ["CALM", 0] : g < 5 ? ["BREEZY", 1] : g < 20 ? ["BUSY", 2] : ["STORMY", 3];
+    // The sky follows gas spikes compared with normal (so it still reacts
+    // when gas is very cheap overall), with fixed gwei levels as a backstop:
+    //   ratio  < 1.5x calm  | 1.5-3x breezy | 3-6x busy  | 6x+ stormy
+    //   gwei   < 1    calm  | 1-5    breezy | 5-20  busy | 20+ stormy
+    // ?gas=N previews a fixed gas price; ?spike=N previews N times normal.
+    const NAMES = ["CALM", "BREEZY", "BUSY", "STORMY"];
+    const spikeParam = Number(new URLSearchParams(location.search).get("spike"));
+    let normalGwei = null;
+    const sky = (g) => {
+      if (spikeParam > 0) g = spikeParam, normalGwei = 1;
+      if (g == null) return null;
+      const abs = g < 1 ? 0 : g < 5 ? 1 : g < 20 ? 2 : 3;
+      const r = normalGwei > 0 ? g / normalGwei : 0;
+      const rel = r < 1.5 ? 0 : r < 3 ? 1 : r < 6 ? 2 : 3;
+      const level = Math.max(abs, rel);
+      return [NAMES[level], level];
+    };
     function label() {
       const s = sky(gwei);
       if (s) document.querySelectorAll('[data-ticker="sky"]').forEach((el) => { el.textContent = s[0]; });
     }
-    addEventListener("chain:gas", (e) => { if (!(forced > 0)) { gwei = e.detail; label(); } });
+    addEventListener("chain:gas", (e) => {
+      if (forced > 0) return;
+      gwei = e.detail.gwei;
+      if (e.detail.normal > 0) normalGwei = e.detail.normal;
+      label();
+    });
     label();
     const light = () => document.documentElement.dataset.theme === "light";
     const rnd = (a) => a[Math.floor(Math.random() * a.length)];
@@ -2280,6 +2318,7 @@
       }
     }
     addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return; // phones and tablets: no paint
       const x = Math.floor(e.clientX / CELL), y = Math.floor(e.clientY / CELL);
       if (x === lx && y === ly) return;
       const c = css("--accent-hover");
